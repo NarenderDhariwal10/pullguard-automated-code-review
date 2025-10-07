@@ -20,64 +20,66 @@ PullGuard is an **AI-powered automated code review system** that integrates with
 **Other:** Redis, JWT Auth, dotenv
 
 ## 📂 Project Structure
+```bash
 pullguard/
 ├── backend/
-|   ├── server.js
-|   ├── .env
-|   ├── package.json
-|   ├── config/
-│   |   └── connectDB.js
-│   |   └── passportConfig.js
-|   ├── controllers/
-│   |   └── reviewController.js
-|   ├── queues/
-│   |   └── reviewQueue.js
-|   ├── routes/
-│   |   └── authRoutes.js
-│   |   └── reviewRoutes.js
-│   |   └── webhookRoutes.js
-|   ├── models/
-│   |   └── reviewModel.js
-│   |   └── userModel.js
-|   ├── services/
-│   |   ├── githubService.js
-│   |   └── openaiService.js
-|   ├── utils/
-│   |   └── helpers.js
-|   ├── middleware/
-│   |   └── webhookValidator.js
-|   ├── jobs/
-│   |   └── reviewJob.js
-|   ├── workers/
-│       └── queueWorker.js
+│   ├── server.js
+│   ├── .env
+│   ├── package.json
+│   ├── config/
+│   │   ├── connectDB.js
+│   │   └── passportConfig.js
+│   ├── controllers/
+│   │   └── reviewController.js
+│   ├── queues/
+│   │   └── reviewQueue.js
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── reviewRoutes.js
+│   │   └── webhookRoutes.js
+│   ├── models/
+│   │   ├── reviewModel.js
+│   │   └── userModel.js
+│   ├── services/
+│   │   ├── githubService.js
+│   │   └── openaiService.js
+│   ├── utils/
+│   │   └── helpers.js
+│   ├── middleware/
+│   │   └── webhookValidator.js
+│   ├── jobs/
+│   │   └── reviewJob.js
+│   ├── workers/
+│   │   └── queueWorker.js
 │
 ├── pullguard-frontend/
 │   ├── src/
-|   |  ├──main.jsx
-|   |  ├──App.jsx
-|   |  ├──index.css
-|   |  ├──utils/
-│   |  |   └─ api.js
-|   |  ├──hooks/
-│   |  |   └─ useAuth.jsx
-|   |  ├──components/
-│   |  |  ├─ Navbar.jsx
-│   |  |  ├─ ProtectedRoute.jsx
-│   |  |  └─ Loader.jsx
-|   |  ├──pages/
-│   |  |  ├─ Home.jsx
-│   |  |  ├─ Dashboard.jsx
-│   |  |  ├─ Repos.jsx
-│   |  |  ├─ Reviews.jsx
-│   |  |  ├─ ReviewDetail.jsx
-│   |  |  ├─ Settings.jsx
-│   |  |  └─ Login.jsx
+│   │   ├── main.jsx
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   ├── utils/
+│   │   │   └── api.js
+│   │   ├── hooks/
+│   │   │   └── useAuth.jsx
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── ProtectedRoute.jsx
+│   │   │   └── Loader.jsx
+│   │   ├── pages/
+│   │   │   ├── Home.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Repos.jsx
+│   │   │   ├── Reviews.jsx
+│   │   │   ├── ReviewDetail.jsx
+│   │   │   ├── Settings.jsx
+│   │   │   └── Login.jsx
 │   ├── public/
 │   ├── package.json
 │
-├── README.md        
-├── .gitignore       
-└── LICENSE          
+├── README.md
+├── .gitignore
+└── LICENSE
+        
 
 ## 👨‍💻 Author
 
