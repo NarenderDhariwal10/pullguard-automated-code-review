@@ -80,6 +80,10 @@ pullguard/
 ├── .gitignore
 └── LICENSE
         
+```
+## How to start
+docker-compose up
+lt --port 3000 --subdomain pullguard-api
 
 ## 👨‍💻 Author
 

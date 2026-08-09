@@ -1,10 +1,7 @@
-require('dotenv').config({ path: __dirname + '/../.env' }); 
 const { Worker } = require('bullmq');
 const { generateReview } = require('../services/aiService');
 const { commentOnPR } = require('../services/githubService');
-const connectDB = require('../config/connectDB');
 const Review = require('../models/reviewModel');
-connectDB();
 
 new Worker(
     'reviewQueue',

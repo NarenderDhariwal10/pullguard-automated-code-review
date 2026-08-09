@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: code-review-app
+    ports:
+      - "3002:3002"
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - .:/app
+    command: npm start
+
+  redis:
+    image: redis:7
+    container_name: redis-server
+    ports:
+      - "6379:6379"

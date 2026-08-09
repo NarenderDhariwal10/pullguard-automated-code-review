@@ -22,7 +22,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchReviews() {
       try {
-        const { data } = await axios.get('http://localhost:3000/api/reviews');
+        const { data } = await axios.get('http://localhost:3008/api/reviews');
         setReviews(data);
         setFiltered(data);
       } catch (err) {

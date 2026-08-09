@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('http://localhost:3000/auth/me', {
+      const res = await fetch('http://localhost:3008/auth/me', {
         credentials: 'include'
       });
       if (res.ok) {

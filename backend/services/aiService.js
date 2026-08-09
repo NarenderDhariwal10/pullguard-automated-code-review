@@ -7,32 +7,101 @@ async function generateReview(code, filename) {
     console.log(`2. Generating AI review for file: ${filename}`);
 
     const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+
     const headers = {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost'
+        'HTTP-Referer': 'http://localhost:3008',
+        'X-Title': 'PullGuard'
     };
 
     const data = {
-        model: 'mistralai/mistral-7b-instruct',
+        model: 'anthropic/claude-sonnet-4',
         messages: [
             {
+                role: 'system',
+                content: `
+You are a Senior Software Engineer reviewing a GitHub Pull Request.
+
+Analyze the code for:
+
+1. Bugs and logical errors
+2. Security vulnerabilities
+3. Performance issues
+4. Code quality and maintainability
+5. Best practices
+
+Return feedback in this format:
+
+## Summary
+
+## Issues Found
+
+### [HIGH]
+- Issue
+- Why it matters
+- Suggested fix
+
+### [MEDIUM]
+- Issue
+- Why it matters
+- Suggested fix
+
+### [LOW]
+- Issue
+- Why it matters
+- Suggested fix
+
+## Overall Recommendation
+(Approve / Needs Changes)
+`
+            },
+            {
                 role: 'user',
-                content: `You are an experienced code reviewer. Review the following code and suggest improvements, bugs, and best practices in a concise bullet point format. Mention file: ${filename} and code ${code}.`
+                content: `
+File: ${filename}
+
+Code:
+
+\`\`\`
+${code}
+\`\`\`
+
+Review this code thoroughly and provide actionable feedback.
+`
             }
-        ]
+        ],
+        temperature: 0.2,
+        max_tokens: 2000
     };
 
     try {
-        console.log("3. Sending request to OpenRouter AI...");
-        const response = await axios.post(endpoint, data, { headers });
-        console.log("4. AI response received");
-        const message = response.data.choices?.[0]?.message?.content;
-        return message?.trim() || 'No content in response';
+        console.log('3. Sending request to OpenRouter...');
+
+        const response = await axios.post(
+            endpoint,
+            data,
+            { headers }
+        );
+
+        console.log('4. AI response received');
+
+        return (
+            response.data?.choices?.[0]?.message?.content ||
+            'No review generated'
+        );
     } catch (err) {
-        console.error('AI API call failed:', err.response?.data || err.message);
-        return 'Error getting AI feedback';
+        console.error(
+            'AI API call failed:',
+            err.response?.data || err.message
+        );
+
+        return `Error generating review: ${
+            err.response?.data?.error?.message || err.message
+        }`;
     }
 }
 
-module.exports = { generateReview };
+module.exports = {
+    generateReview
+};

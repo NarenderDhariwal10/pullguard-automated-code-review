@@ -1,6 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const connectDB = require('./config/connectDB');
+const connectDB = require('./config/connectDB.js');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'http://localhost:5174',
   credentials: true
 }));
 
@@ -40,8 +40,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-connectDB();
-
 // Routes
 app.use('/auth', authRoutes);
 app.use('/api', reviewRoutes);
@@ -57,6 +55,13 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+const startApp = async () => {
+  await connectDB();
+  require('./workers/queueWorker');
+
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+};
+
+startApp();

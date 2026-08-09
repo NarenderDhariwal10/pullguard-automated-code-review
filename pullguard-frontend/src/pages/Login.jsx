@@ -17,7 +17,7 @@ export default function Login() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:3000/auth/me', { withCredentials: true })
+      .get('http://localhost:3008/auth/me', { withCredentials: true })
       .then(res => {
         if (res.data) {
           setUser(res.data);
@@ -74,7 +74,7 @@ export default function Login() {
               style={logoutBtnStyle}
               onClick={() => {
                 axios
-                  .get('http://localhost:3000/auth/logout', { withCredentials: true })
+                  .get('http://localhost:3008/auth/logout', { withCredentials: true })
                   .then(() => {
                     setUser(null);
                     navigate('/');
@@ -89,7 +89,7 @@ export default function Login() {
             <h4 className="mb-4">Sign in to PullGuard</h4>
             <Button
               style={loginBtnStyle}
-              href="http://localhost:3000/auth/github"
+              href="http://localhost:3008/auth/github"
             >
               <FaGithub className="me-2" /> Login with GitHub
             </Button>
