@@ -1,93 +1,209 @@
-import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Shield, ChevronDown } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { Navbar as BSNavbar, Container, Nav, Button, Image, NavDropdown } from 'react-bootstrap';
-import { FaSignInAlt, FaSignOutAlt, FaUser, FaCog } from 'react-icons/fa';
+import { useDemoMode, demoUser } from '../hooks/useDemoMode';
+import { API_URL } from '../utils/config';
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+  const { isDemo } = useDemoMode();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  return (
-    <BSNavbar bg="white" expand="lg" className="shadow-sm border-bottom" sticky="top">
-      <Container>
-        {/* Brand */}
-        <BSNavbar.Brand as={Link} to="/" className="fw-bold fs-3 text-primary">
-          PullGuard
-        </BSNavbar.Brand>
+  const prefix = isDemo ? '/demo' : '';
+  const displayUser = isDemo ? demoUser : user;
 
-        {/* Mobile toggle */}
-        <BSNavbar.Toggle aria-controls="navMenu" />
+  const handleLogout = async () => {
+    if (isDemo) {
+      navigate('/');
+      return;
+    }
 
-        {/* Menu */}
-        <BSNavbar.Collapse id="navMenu">
-          {/* Main nav links */}
-          <Nav className="me-auto fs-5">
-            <Nav.Link as={NavLink} to="/dashboard">
-              Dashboard
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="/reviews">
-              Reviews
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="/repos">
-              Repos
-            </Nav.Link>
-          </Nav>
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
 
-          {/* Auth area */}
-          <div className="d-flex align-items-center">
-            {user ? (
-              <NavDropdown
-                align="end"
-                title={
-                  <span className="d-flex align-items-center">
-                    <Image
-                      src={user.avatarUrl}
-                      alt="avatar"
-                      roundedCircle
-                      className="me-2 border border-primary"
-                      style={{ width: 36, height: 36, objectFit: 'cover' }}
-                    />
-                    <span className="fw-semibold text-primary">{user.login}</span>
-                  </span>
-                }
+    setUser(null);
+    navigate('/');
+  };
+
+  const navLinks = [
+    { to: `${prefix}/dashboard`, label: 'Dashboard' },
+    { to: `${prefix}/reviews`, label: 'Reviews' },
+    { to: `${prefix}/repos`, label: 'Repositories' },
+  ];
+
+  const isActive = (path) =>
+    location.pathname === path ||
+    location.pathname.startsWith(path + '/');
+
+  const isLanding = location.pathname === '/';
+
+  /*
+   * Landing page navbar
+   */
+  if (isLanding) {
+    return (
+      <nav className="navbar navbar-expand-md bg-white border-bottom">
+        <div className="container py-2">
+          <Link
+            to="/"
+            className="navbar-brand d-flex align-items-center gap-2 fw-bold"
+          >
+            <Shield size={24} className="text-primary" />
+            PullGuard
+          </Link>
+
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#landingNavbar"
+            aria-controls="landingNavbar"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+
+          <div
+            className="collapse navbar-collapse"
+            id="landingNavbar"
+          >
+            <div className="navbar-nav ms-auto align-items-md-center">
+              <Link to="/how-it-works" className="nav-link">
+                How It Works
+              </Link>
+
+              <Link to="/setup" className="nav-link">
+                Setup Guide
+              </Link>
+
+              <Link to="/login" className="nav-link">
+                Log in
+              </Link>
+
+              <Link
+                to="/demo"
+                className="btn btn-primary ms-md-2 mt-2 mt-md-0"
               >
-                <NavDropdown.Item as={Link} to="/profile">
-                  <FaUser className="me-2" /> Profile
-                </NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/settings">
-                  <FaCog className="me-2" /> Settings
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item as={Link} to="/logout" className="text-danger">
-                  <FaSignOutAlt className="me-2" /> Sign out
-                </NavDropdown.Item>
-              </NavDropdown>
+                Get Started
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  /*
+   * Dashboard / application navbar
+   */
+  return (
+    <nav className="navbar navbar-expand-md bg-white border-bottom">
+      <div className="container">
+        <Link
+          to="/"
+          className="navbar-brand d-flex align-items-center gap-2 fw-bold"
+        >
+          <Shield size={24} className="text-primary" />
+
+          PullGuard
+
+          {isDemo && (
+            <span className="badge bg-light text-secondary border">
+              Demo
+            </span>
+          )}
+        </Link>
+
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNavbar"
+          aria-controls="mainNavbar"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        <div
+          className="collapse navbar-collapse"
+          id="mainNavbar"
+        >
+          <div className="navbar-nav ms-auto me-md-4">
+            {navLinks.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`nav-link ${
+                  isActive(to) ? 'active fw-semibold' : ''
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="d-flex align-items-center gap-2">
+            {displayUser ? (
+              <>
+                <div className="d-flex align-items-center gap-2">
+                  {displayUser.avatarUrl ? (
+                    <img
+                      src={displayUser.avatarUrl}
+                      alt=""
+                      width="32"
+                      height="32"
+                      className="rounded-circle"
+                    />
+                  ) : (
+                    <div
+                      className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                      }}
+                    >
+                      {displayUser.username?.[0]?.toUpperCase() || 'D'}
+                    </div>
+                  )}
+
+                  <span className="small text-secondary d-none d-sm-block">
+                    {displayUser.username}
+                  </span>
+
+                  <ChevronDown
+                    size={14}
+                    className="text-secondary"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={handleLogout}
+                >
+                  {isDemo ? 'Exit Demo' : 'Logout'}
+                </button>
+              </>
             ) : (
-              <Button as={Link} to="/login" variant="primary" size="sm" className="fw-semibold px-3">
-                <FaSignInAlt className="me-1" /> Sign in
-              </Button>
+              <a
+                href={`${API_URL}/auth/github`}
+                className="btn btn-primary btn-sm"
+              >
+                Sign in with GitHub
+              </a>
             )}
           </div>
-        </BSNavbar.Collapse>
-      </Container>
-
-      {/* Hover & active states */}
-      <style>{`
-        .nav-link {
-          transition: color 0.25s ease, background-color 0.25s ease;
-        }
-        .nav-link.active {
-          color: #0d6efd !important;
-          font-weight: 600;
-        }
-        .nav-link:hover {
-          color: #0b5ed7 !important;
-        }
-        .navbar-brand:hover {
-          color: #0a58ca !important;
-          text-decoration: none;
-        }
-      `}</style>
-    </BSNavbar>
+        </div>
+      </div>
+    </nav>
   );
 }

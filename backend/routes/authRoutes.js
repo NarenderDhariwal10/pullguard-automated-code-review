@@ -2,39 +2,35 @@ const express = require('express');
 const passport = require('passport');
 
 const router = express.Router();
+const FRONTEND_URL = process.env.FRONTEND_URL ;
 
-// GitHub OAuth login
 router.get('/github', passport.authenticate('github', { scope: ['repo'] }));
 
-// Callback after GitHub authentication
 router.get(
   '/github/callback',
-  passport.authenticate('github', { failureRedirect: '/' }),
+  passport.authenticate('github', { failureRedirect: `${FRONTEND_URL}/login?error=auth_failed` }),
   (req, res) => {
-    console.log("✅ User authenticated:", req.user);
-    res.redirect('http://localhost:5173/dashboard'); // Send back to React
+    res.redirect(`${FRONTEND_URL}/dashboard`);
   }
 );
 
-
-// Logout user
-router.get('/logout', (req, res) => {
-  req.logout(err => {
-    if (err) return res.status(500).send(err);
-    res.redirect('/');
+router.get('/logout', (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.redirect(`${FRONTEND_URL}/`);
   });
 });
 
-// Current user info
 router.get('/me', (req, res) => {
-  console.log("Session data:", req.session);
-  console.log("User in request:", req.user);
   if (!req.user) {
     return res.status(401).json({ message: 'Not authenticated' });
   }
-  res.json(req.user);
+  res.json({
+    id: req.user._id,
+    username: req.user.username,
+    avatarUrl: req.user.avatarUrl,
+    githubId: req.user.githubId
+  });
 });
-
-
 
 module.exports = router;

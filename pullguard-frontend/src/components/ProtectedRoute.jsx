@@ -5,7 +5,20 @@ export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: '60vh' }}
+      >
+        <div
+          className="spinner-border text-primary"
+          role="status"
+          aria-label="Loading"
+        >
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {

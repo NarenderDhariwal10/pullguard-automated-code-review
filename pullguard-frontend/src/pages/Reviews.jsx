@@ -1,114 +1,148 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
-import { Link, useSearchParams } from 'react-router-dom';
-import { FaCodeBranch, FaClock, FaCommentDots, FaExclamationTriangle } from 'react-icons/fa';
-import api from '../utils/api';
+import { useSearchParams } from 'react-router-dom';
+import { useDemoMode } from '../hooks/useDemoMode';
+import { demoApi, liveApi } from '../utils/api';
+import ReviewCard from '../components/ReviewCard';
+import DemoBanner from '../components/DemoBanner';
 
 export default function Reviews() {
+  const { isDemo } = useDemoMode();
+  const [searchParams] = useSearchParams();
+
+  const repoFilter = searchParams.get('repo');
+
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchParams] = useSearchParams();
-  const repo = searchParams.get('repo');
+  const [error, setError] = useState(null);
 
+  const prefix = isDemo ? '/demo' : '';
+  
   useEffect(() => {
-    const url = repo ? `/api/reviews?repo=${encodeURIComponent(repo)}` : '/api/reviews';
+    const api = isDemo ? demoApi : liveApi;
+    
+
+    setLoading(true);
+    setError(null);
+
     api
-      .get(url)
-      .then((res) => setReviews(res.data))
+      .getReviews(repoFilter || undefined)
+      .then((data) => {
+        const filtered =
+          repoFilter && isDemo
+            ? data.filter((review) => review.repo === repoFilter)
+            : data;
+
+        setReviews(filtered);
+      })
       .catch((err) => {
         console.error(err);
         setError('Failed to load reviews.');
       })
-      .finally(() => setLoading(false));
-  }, [repo]);
-
-  const cardStyle = {
-    borderRadius: '10px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-    cursor: 'pointer',
-  };
-
-  const cardHoverStyle = {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 6px 18px rgba(0,0,0,0.1)',
-  };
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [isDemo, repoFilter]);
 
   if (loading) {
     return (
-      <Container className="d-flex justify-content-center align-items-center" style={{ height: '70vh' }}>
-        <Spinner animation="border" variant="primary" />
-      </Container>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: '60vh' }}
+      >
+        <div className="text-center">
+          <div
+            className="spinner-border text-primary mb-3"
+            role="status"
+          >
+            <span className="visually-hidden">
+              Loading...
+            </span>
+          </div>
+
+          <p className="text-secondary mb-0">
+            Loading reviews...
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="mt-4">
-      <h2 className="fw-bold mb-4">
-        Your Code Reviews{' '}
-        {repo ? <small className="text-muted">({repo})</small> : null}
-      </h2>
+    <div className="container py-4">
 
+      {/* Page header */}
+      <div className="mb-4">
+        <h1 className="fw-bold mb-1">
+          Review History
+        </h1>
+
+        <p className="text-secondary mb-0">
+          {repoFilter
+            ? `Reviews for ${repoFilter}`
+            : 'All pull request reviews'}
+        </p>
+      </div>
+
+      {/* Error */}
       {error && (
-        <Alert variant="danger" className="d-flex align-items-center">
-          <FaExclamationTriangle className="me-2" />
+        <div className="alert alert-danger mb-4">
           {error}
-        </Alert>
-      )}
-
-      {!error && reviews.length === 0 && (
-        <div className="text-center text-muted py-5">
-          <FaCommentDots size={40} className="mb-3" />
-          <h5>No reviews found</h5>
-          <p>It looks like you haven’t received any AI reviews yet.</p>
         </div>
       )}
 
-      {!error && reviews.length > 0 && (
-        <Row xs={1} md={2} lg={3} className="g-4">
-          {reviews.map((r) => (
-            <Col key={r._id}>
-              <Card
-                style={cardStyle}
-                className="h-100"
-                onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardStyle)}
-              >
-                <Card.Body>
-                  <Card.Title className="fw-bold mb-2">
-                    PR #{r.prNumber ?? '—'}
-                  </Card.Title>
-                  <Card.Subtitle className="mb-2 text-muted">
-                    <FaCodeBranch className="me-1" /> {r.repo}
-                  </Card.Subtitle>
-                  <Card.Text
-                    className="mb-3"
-                    style={{
-                      maxHeight: '3.5rem',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {r.comment || 'No comment available.'}
-                  </Card.Text>
-                  <div className="text-muted small mb-3">
-                    <FaClock className="me-1" /> {new Date(r.createdAt).toLocaleString()}
-                  </div>
-                  <Button
-                    as={Link}
-                    to={`/reviews/${r._id}`}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    View Details
-                  </Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+      {/* Demo banner */}
+      {isDemo && (
+        <div className="mb-4">
+          <DemoBanner />
+        </div>
       )}
-    </Container>
+
+      {/* Reviews */}
+      {reviews.length > 0 ? (
+        <div className="row g-4">
+          {reviews.map((review) => (
+            <div
+              key={review._id}
+              className="col-12 col-md-6 col-lg-4"
+            >
+              <ReviewCard
+                review={review}
+                basePath={`${prefix}/reviews`}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Empty state */
+        <div className="card border-0 shadow-sm">
+          <div className="card-body text-center py-5">
+
+            <div
+              className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style={{
+                width: '64px',
+                height: '64px',
+              }}
+            >
+              <span className="fs-3">
+                📄
+              </span>
+            </div>
+
+            <h2 className="h5 fw-semibold mb-2">
+              No reviews yet
+            </h2>
+
+            <p className="text-secondary mb-0">
+              {repoFilter
+                ? `No reviews found for ${repoFilter}.`
+                : 'Open a PR on a connected repo to trigger a review.'}
+            </p>
+
+          </div>
+        </div>
+      )}
+
+    </div>
   );
 }

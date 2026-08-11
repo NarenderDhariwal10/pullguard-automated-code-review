@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import { API_URL } from '../utils/config';
 
 const AuthContext = createContext();
 
@@ -8,26 +9,20 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('http://localhost:3008/auth/me', {
-        credentials: 'include'
-      });
+      const res = await fetch(`${API_URL}/auth/me`, { credentials: 'include' });
       if (res.ok) {
-        const data = await res.json();
-        setUser(data);
+        setUser(await res.json());
       } else {
         setUser(null);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  useEffect(() => { fetchUser(); }, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser, loading, fetchUser }}>

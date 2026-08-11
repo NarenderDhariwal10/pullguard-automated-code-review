@@ -1,35 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import axios from 'axios';
 import { Container, Button, Card, Spinner } from 'react-bootstrap';
 import { FaGithub, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { API_URL } from '../utils/config';
 
 export default function Login() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, setUser } = useAuth();
   const navigate = useNavigate();
 
-  const colors = {
-    primary: '#24292e', // GitHub dark
-    accent: '#28a745',  // GitHub green
-    light: '#f6f8fa',
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await axios.get(`${API_URL}/auth/logout`, {
+        withCredentials: true,
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      navigate('/');
+    }
   };
 
-  useEffect(() => {
-    axios
-      .get('http://localhost:3008/auth/me', { withCredentials: true })
-      .then(res => {
-        if (res.data) {
-          setUser(res.data);
-          // Redirect if logged in
-          navigate('/dashboard');
-        } else {
-          setUser(null);
-        }
-      })
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
-  }, [navigate]);
+  const colors = {
+    primary: '#24292e',
+    accent: '#28a745',
+    light: '#f6f8fa',
+  };
 
   const cardStyle = {
     maxWidth: '400px',
@@ -70,17 +74,7 @@ export default function Login() {
           <>
             <FaUserCircle size={60} color={colors.primary} className="mb-3" />
             <h3 className="mb-3">Welcome, {user.username}</h3>
-            <Button
-              style={logoutBtnStyle}
-              onClick={() => {
-                axios
-                  .get('http://localhost:3008/auth/logout', { withCredentials: true })
-                  .then(() => {
-                    setUser(null);
-                    navigate('/');
-                  });
-              }}
-            >
+            <Button style={logoutBtnStyle} onClick={handleLogout}>
               <FaSignOutAlt className="me-2" /> Logout
             </Button>
           </>
@@ -89,9 +83,18 @@ export default function Login() {
             <h4 className="mb-4">Sign in to PullGuard</h4>
             <Button
               style={loginBtnStyle}
-              href="http://localhost:3008/auth/github"
+              href={`${API_URL}/auth/github`}
+              className="w-100"
             >
               <FaGithub className="me-2" /> Login with GitHub
+            </Button>
+            <Button
+              as={Link}
+              to="/demo"
+              variant="outline-secondary"
+              className="w-100 mt-3"
+            >
+              Try Demo
             </Button>
           </>
         )}

@@ -1,114 +1,118 @@
-import { Container, Button, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaGithub, FaShieldAlt } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
+import { Shield, ArrowRight, Zap, GitBranch, Lock } from 'lucide-react';
+import InfoBox from '../components/InfoBox';
 
 export default function Home() {
-  const [fadeIn, setFadeIn] = useState(false);
-
-  useEffect(() => {
-    setFadeIn(true);
-  }, []);
-
-  
-  const colors = {
-    primary: '#1e3c72',
-    secondary: '#2a5298',
-    accent: '#fdb813',
-    lightText: 'rgba(240, 244, 248, 0.85)',
-  };
-
-  const heroStyle = {
-    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.primary} 100%)`,
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: colors.lightText,
-    textAlign: 'center',
-    padding: '4rem 1rem',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    opacity: fadeIn ? 1 : 0,
-    transform: fadeIn ? 'translateY(0)' : 'translateY(20px)',
-    transition: 'opacity 0.8s ease, transform 0.8s ease',
-  };
-
-  const brandTextStyle = {
-    color: colors.accent,
-    fontWeight: 700,
-  };
-
-  const textLight = {
-    color: colors.lightText,
-    fontSize: '1.25rem',
-    maxWidth: '600px',
-    margin: '0 auto 2.5rem',
-    lineHeight: 1.6,
-  };
-
-  const iconWrapper = {
-    marginBottom: '1.5rem',
-    opacity: 0.15,
-    filter: 'drop-shadow(0 0 8px rgba(253, 184, 19, 0.5))',
-    transition: 'opacity 0.3s ease, filter 0.3s ease',
-  };
-
-  const getStartedBtn = {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-    color: colors.primary,
-    fontWeight: 600,
-    fontSize: '1.1rem',
-    padding: '0.75rem 2.5rem',
-    borderRadius: '40px',
-    boxShadow: `0 4px 12px rgba(253, 184, 19, 0.5)`,
-    transition: 'all 0.3s ease',
-  };
+  const features = [
+    {
+      icon: Lock,
+      title: 'Security Analysis',
+      desc: 'Flags injection risks, unsafe patterns, and common OWASP issues directly in PR diffs.',
+    },
+    {
+      icon: Zap,
+      title: 'Async Processing',
+      desc: 'Webhooks enqueue jobs on Redis/BullMQ so reviews never block the GitHub callback.',
+    },
+    {
+      icon: GitBranch,
+      title: 'GitHub Workflow',
+      desc: 'Comments appear on the PR — your team keeps their existing review process in GitHub.',
+    },
+  ];
 
   return (
-    <div style={heroStyle}>
-      <Container>
-        <Row className="justify-content-center align-items-center">
-          <Col md={8}>
-            <div
-              style={iconWrapper}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = 0.25)}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = 0.15)}
+    <div>
+      {/* Hero */}
+      <section className="container py-5">
+        <div className="text-center py-5">
+          <p className="text-primary fw-semibold mb-3">
+            🤖 AI Code Review · Portfolio Project
+          </p>
+
+          <h1 className="display-4 fw-bold text-dark mb-4">
+            Automated PR reviews for teams that{' '}
+            <span className="text-primary">
+              self-host their tools
+            </span>
+          </h1>
+
+          <p className="lead text-secondary mx-auto mb-4" style={{ maxWidth: '750px' }}>
+            PullGuard connects to GitHub via webhooks and a server-side token,
+            runs AI analysis on pull requests, and posts structured feedback.
+            Built to demonstrate production engineering — queue workers,
+            JWT auth, and clean architecture.
+          </p>
+
+          <div className="d-flex justify-content-center gap-3 flex-wrap">
+            <Link
+              to="/demo"
+              className="btn btn-primary btn-lg d-flex align-items-center gap-2"
             >
-              <FaShieldAlt size={100} />
+              Try Demo
+              <ArrowRight size={18} />
+            </Link>
+
+            <Link
+              to="/how-it-works"
+              className="btn btn-outline-secondary btn-lg"
+            >
+              How It Works
+            </Link>
+          </div>
+
+          <p className="small text-secondary mt-3">
+            Demo mode works instantly — no PAT or webhook required
+          </p>
+        </div>
+      </section>
+
+      {/* Info box */}
+      <section className="container pb-5">
+        <div className="mx-auto" style={{ maxWidth: '750px' }}>
+          <InfoBox />
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="container py-5">
+        <div className="text-center mb-5">
+          <h2 className="fw-bold">How It Works</h2>
+          <p className="text-secondary">
+            Automated code reviews without changing your team's workflow.
+          </p>
+        </div>
+
+        <div className="row g-4">
+          {features.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="col-md-4">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body text-center p-4">
+                  <div className="mb-4">
+                    <div
+                      className="bg-primary bg-opacity-10 rounded-3 d-inline-flex align-items-center justify-content-center"
+                      style={{
+                        width: '56px',
+                        height: '56px',
+                      }}
+                    >
+                      <Icon size={24} className="text-primary" />
+                    </div>
+                  </div>
+
+                  <h3 className="h5 fw-semibold text-dark mb-3">
+                    {title}
+                  </h3>
+
+                  <p className="text-secondary small mb-0">
+                    {desc}
+                  </p>
+                </div>
+              </div>
             </div>
-            <h1
-              style={{
-                fontWeight: 900,
-                fontSize: '3.5rem',
-                marginBottom: '1rem',
-              }}
-            >
-              Welcome to <span style={brandTextStyle}>PullGuard</span>
-            </h1>
-            <p style={textLight}>
-              Automated, AI-powered code reviews for your GitHub repositories.
-            </p>
-            <Button
-              as={Link}
-              to="/login"
-              style={getStartedBtn}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#e6ac00';
-                e.currentTarget.style.boxShadow =
-                  '0 6px 20px rgba(230, 172, 0, 0.7)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = colors.accent;
-                e.currentTarget.style.boxShadow =
-                  '0 4px 12px rgba(253, 184, 19, 0.5)';
-              }}
-            >
-              <FaGithub className="me-2" size={20} /> Get Started with GitHub
-            </Button>
-          </Col>
-        </Row>
-      </Container>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

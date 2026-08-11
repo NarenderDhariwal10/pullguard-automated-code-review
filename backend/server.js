@@ -6,51 +6,41 @@ const session = require('express-session');
 const passport = require('passport');
 
 dotenv.config();
-require('./config/passportConfig'); // GitHub OAuth setup
+require('./config/passportConfig');
 
 const authRoutes = require('./routes/authRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
+const PORT = process.env.PORT || 3008;
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: [FRONTEND_URL],
   credentials: true
 }));
 
-
 app.use(express.json());
 
-
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'secret',
+  secret: process.env.SESSION_SECRET || 'pullguard-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    secure: false, 
-    httpOnly: true,
-    sameSite: 'lax'
-  }
+  cookie: { secure: false, httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
-
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Routes
 app.use('/auth', authRoutes);
 app.use('/api', reviewRoutes);
 app.use('/webhook', webhookRoutes);
 
-// Health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Server is running' });
+  res.json({ status: 'OK', message: 'PullGuard API is running' });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
@@ -58,9 +48,8 @@ app.use((req, res) => {
 const startApp = async () => {
   await connectDB();
   require('./workers/queueWorker');
-
   app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`PullGuard API running on http://localhost:${PORT}`);
   });
 };
 

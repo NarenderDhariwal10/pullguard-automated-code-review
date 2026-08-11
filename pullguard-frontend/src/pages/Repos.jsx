@@ -1,92 +1,154 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Button, Spinner } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { FaCodeBranch, FaEye, FaGithub } from 'react-icons/fa';
-import api from '../utils/api';
+import { useDemoMode } from '../hooks/useDemoMode';
+import { demoApi, liveApi } from '../utils/api';
+import RepoCard from '../components/RepoCard';
+import DemoBanner from '../components/DemoBanner';
+import InfoBox from '../components/InfoBox';
 
 export default function Repos() {
+  const { isDemo } = useDemoMode();
+
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const prefix = isDemo ? '/demo' : '';
 
   useEffect(() => {
-    api.get('/api/repos')
-      .then(res => setRepos(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+    const api = isDemo ? demoApi : liveApi;
 
-  const cardStyle = {
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-  };
+    setLoading(true);
+    setError(null);
 
-  const cardHoverStyle = {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-  };
+    api
+      .getRepos()
+      .then((data) => {
+        setRepos(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(
+          err?.response?.data?.error || 'Failed to load repositories'
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [isDemo]);
 
+  // Loading
   if (loading) {
     return (
-      <Container className="d-flex justify-content-center align-items-center" style={{ height: '70vh' }}>
-        <Spinner animation="border" variant="primary" role="status">
-          <span className="visually-hidden">Loading repositories...</span>
-        </Spinner>
-      </Container>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: '60vh' }}
+      >
+        <div className="text-center">
+          <div
+            className="spinner-border text-primary mb-3"
+            role="status"
+          >
+            <span className="visually-hidden">
+              Loading...
+            </span>
+          </div>
+
+          <p className="text-secondary mb-0">
+            Loading repositories...
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="mt-5">
-      <h2 className="mb-4 fw-bold text-primary">📂 Your Connected Repositories</h2>
+    <div className="container py-4">
 
-      {repos.length === 0 ? (
-        <div className="text-center py-5 text-muted">
-          <FaGithub size={50} className="mb-3" />
-          <h5>No connected repositories</h5>
-          <p>It looks like you haven’t connected any repositories yet.</p>
-          <Button variant="success" as={Link} to="/connect">
-            Connect a Repository
-          </Button>
+      {/* Header */}
+      <div className="mb-4">
+        <h1 className="fw-bold mb-1">
+          Connected Repositories
+        </h1>
+
+        <p className="text-secondary mb-0">
+          Repositories with PullGuard installed
+        </p>
+      </div>
+
+      {/* Demo information */}
+      {isDemo && (
+        <div className="mb-4">
+          <div className="alert alert-primary mb-3">
+            <div className="small">
+              <strong>Demo mode:</strong>{' '}
+              These are sample repositories. In production, your
+              team connects real repositories via webhook + server
+              PAT. See the Settings or Setup Guide for details.
+            </div>
+          </div>
+
+          <DemoBanner />
+        </div>
+      )}
+
+      {/* Error */}
+      {!isDemo && error && (
+        <div className="mb-4">
+          <InfoBox />
+        </div>
+      )}
+
+      {/* Repository list */}
+      {repos.length > 0 ? (
+        <div className="row g-4">
+          {repos.map((repo) => (
+            <div
+              key={repo.id}
+              className="col-12 col-md-6 col-lg-4"
+            >
+              <RepoCard
+                repo={repo}
+                basePath={`${prefix}/reviews`}
+              />
+            </div>
+          ))}
         </div>
       ) : (
-        <Row xs={1} md={2} lg={3} className="g-4">
-          {repos.map(repo => (
-            <Col key={repo.id}>
-              <Card
-                className="shadow-sm border-0 h-100"
-                style={cardStyle}
-                onMouseEnter={e => Object.assign(e.currentTarget.style, cardHoverStyle)}
-                onMouseLeave={e => Object.assign(e.currentTarget.style, cardStyle)}
-              >
-                <Card.Body>
-                  <Card.Title className="fw-bold">{repo.name}</Card.Title>
-                  <Card.Subtitle className="mb-3 text-muted">
-                    <FaCodeBranch className="me-2" /> {repo.defaultBranch}
-                  </Card.Subtitle>
-                  <div className="d-flex gap-2">
-                    <Button
-                      as={Link}
-                      to={`/reviews?repo=${encodeURIComponent(repo.name)}`}
-                      variant="primary"
-                      size="sm"
-                    >
-                      <FaEye className="me-1" /> View Reviews
-                    </Button>
-                    <Button
-                      href={repo.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="outline-dark"
-                      size="sm"
-                    >
-                      <FaGithub className="me-1" /> GitHub
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        /* Empty state */
+        <div className="card border-0 shadow-sm">
+          <div className="card-body text-center py-5">
+
+            <div
+              className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style={{
+                width: '64px',
+                height: '64px',
+              }}
+            >
+              <span className="fs-3">
+                📁
+              </span>
+            </div>
+
+            <h2 className="h5 fw-semibold mb-2">
+              No repositories found
+            </h2>
+
+            {!isDemo ? (
+              <p className="text-secondary small mb-0">
+                Sign in with GitHub and configure a webhook on
+                your repository. See the Setup Guide for details.
+              </p>
+            ) : (
+              <p className="text-secondary small mb-0">
+                No sample repositories are currently available.
+              </p>
+            )}
+
+          </div>
+        </div>
       )}
-    </Container>
+
+    </div>
   );
 }
