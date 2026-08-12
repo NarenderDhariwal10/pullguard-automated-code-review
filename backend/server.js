@@ -13,7 +13,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3008;
+const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 app.use(cors({

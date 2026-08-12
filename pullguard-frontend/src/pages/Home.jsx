@@ -27,7 +27,7 @@ export default function Home() {
       <section className="container py-5">
         <div className="text-center py-5">
           <p className="text-primary fw-semibold mb-3">
-            🤖 AI Code Review · Portfolio Project
+            🤖 AI powered Automated Code Review 
           </p>
 
           <h1 className="display-4 fw-bold text-dark mb-4">
@@ -41,7 +41,7 @@ export default function Home() {
             PullGuard connects to GitHub via webhooks and a server-side token,
             runs AI analysis on pull requests, and posts structured feedback.
             Built to demonstrate production engineering — queue workers,
-            JWT auth, and clean architecture.
+            github auth, and clean architecture.
           </p>
 
           <div className="d-flex justify-content-center gap-3 flex-wrap">
