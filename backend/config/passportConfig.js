@@ -40,14 +40,21 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-  console.log("Deserializing user");
+  console.log('[Passport] Deserializing user ID:', id);
+
   try {
     const user = await User.findById(id);
-    console.log("User found");
-    done(null, user);
+
+    if (!user) {
+      console.error('[Passport] No user found for session ID:', id);
+      return done(null, false);
+    }
+
+    console.log('[Passport] User restored successfully:', user.username);
+    return done(null, user);
   } catch (err) {
-    console.error("Error in deserializeUser:", err);
-    done(err, null);
+    console.error('[Passport] Deserialization failed:', err.message);
+    return done(err);
   }
 });
 

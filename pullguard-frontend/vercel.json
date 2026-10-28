@@ -2,6 +2,18 @@
 {
   "rewrites": [
     {
+      "source": "/auth/:path*",
+      "destination": "https://pullguard-automated-code-review.onrender.com/auth/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://pullguard-automated-code-review.onrender.com/api/:path*"
+    },
+    {
+      "source": "/webhook/:path*",
+      "destination": "https://pullguard-automated-code-review.onrender.com/webhook/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
