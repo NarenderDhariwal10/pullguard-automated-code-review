@@ -17,7 +17,7 @@ const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 app.use(cors({
-  origin: [FRONTEND_URL],
+  origin: process.env.FRONTEND_URL,
   credentials: true
 }));
 
@@ -27,7 +27,12 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: true, httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }
+  cookie: {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  }
 }));
 
 app.use(passport.initialize());
